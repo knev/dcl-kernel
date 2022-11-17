@@ -166,7 +166,7 @@ console.log( key.exportKey('pkcs1-public-pem') );
 
 //-------------------------------------------------------------------------------------------------
 
-function onClick_Warp()
+function onClick_Warp_()
 {
   const json_User= { id: "joeSpace", auth:"https://hubs.local:8080/hub.html?hub_id=7EpqHEW" };
 //  const json_Hyperport= { browser : "_default", target : "_blank", URL : "http://localhost/js-blue.git/blue.html" };
@@ -188,7 +188,7 @@ function onClick_Warp()
 //-------------------------------------------------------------------------------------------------
 // Sender
 
-function callback_Ack_Warp(msg, json_Ack, json_Warp, json_Engage) 
+function callback_Ack_Warp_(msg, json_Ack, json_Warp, json_Engage) 
 {
 	// console.log('callback_Ack_Warp: Ack: ', json_Ack);
 
@@ -199,7 +199,7 @@ function callback_Ack_Warp(msg, json_Ack, json_Warp, json_Engage)
   return true;
 }
 
-function callback_Ack_Engage(msg, json_Ack, json_Engage)
+function callback_Ack_Engage_(msg, json_Ack, json_Engage)
 {
 	console.log('callback_Ack_Engage: Ack Engage: ', json_Ack);
 
@@ -210,7 +210,7 @@ function callback_Ack_Engage(msg, json_Ack, json_Engage)
 //-------------------------------------------------------------------------------------------------
 // Receiver
 
-function callback_Warp(msg, json_Warp, json_Ack)
+function callback_Warp_(msg, json_Warp, json_Ack)
 {
 	// console.log('callback_Warp: Warp: ', json_Warp);
 
@@ -246,7 +246,7 @@ function callback_Warp(msg, json_Warp, json_Ack)
   return true;
 }
 
-function callback_Engage(msg, json_Engage, json_Ack)
+function callback_Engage_(msg, json_Engage, json_Ack)
 {
 	// console.log('callback_Engage: Engage: ', json_Engage);
 
@@ -259,7 +259,7 @@ function callback_Engage(msg, json_Engage, json_Ack)
 
 //-------------------------------------------------------------------------------------------------
 
-function callback_Abort()
+function callback_Abort_()
 {
 	console.log('callback_Abort: ... : ');
 
@@ -268,12 +268,24 @@ function callback_Abort()
 
 //-------------------------------------------------------------------------------------------------
 
+const logr_= {
+  CXNS : 1,
+  REFL : 1,
+  MsgEnv : 1
+}
+
 const str_uuid_ID_ : string = uuid();
 console.log('uuid_referer_ID= ', str_uuid_ID_);
-twoPhW.config.str_uuid_referer= str_uuid_ID_;
-twoPhW.config.receiver(callback_Warp, callback_Engage);
-twoPhW.config.sender(callback_Ack_Warp, callback_Ack_Engage);
-twoPhW.config.callback_Abort= callback_Abort;
+
+twoPhW.config.options= {
+  str_uuid_referer: str_uuid_ID_,
+  callback_Warp: callback_Warp_, 
+  callback_Engage: callback_Engage_,
+  callback_Ack_Warp: callback_Ack_Warp_, 
+  callback_Ack_Engage: callback_Ack_Engage_,
+  callback_Abort: callback_Abort_,
+  logr : logr_
+}
 
 //-----------------------------------------------------------------------------------------------------------------------
 // IPSME base handlers
@@ -352,6 +364,10 @@ function ipsme_handler_(msg : any)
   
   console.log("handler_: DROP! msg: ", msg);
   return false
+}
+
+IPSME_MsgEnv.config.options= {
+  logr: logr_
 }
 
 IPSME_MsgEnv.subscribe(ipsme_handler_);
@@ -651,7 +667,7 @@ export class BrowserInterface {
   public GoTo(data: { x: number; y: number }) {
     notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
     // TeleportController.goTo(data.x, data.y)
-    onClick_Warp()
+    onClick_Warp_()
   }
 
   public GoToMagic() {
