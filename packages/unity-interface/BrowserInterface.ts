@@ -166,17 +166,33 @@ console.log( key.exportKey('pkcs1-public-pem') );
 
 //-------------------------------------------------------------------------------------------------
 
-function onClick_Warp_()
+function onClick_Warp_(x: number, y : number)
 {
+  console.log('onClick_Warp_(): ', x, y);
+
   const json_User= { id: "joeSpace", auth:"https://hubs.local:8080/hub.html?hub_id=7EpqHEW" };
-//  const json_Hyperport= { browser : "_default", target : "_blank", URL : "http://localhost/js-blue.git/blue.html" };
-  const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9" };
+  let json_Warp= undefined;
 
-	const uuid_id= uuid();
-	const rsa_enc= key.encrypt(uuid_id, 'base64');
+  // -----
 
-	const json_Warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
-	json_Warp.warp.lock= rsa_enc;
+  if (x == -20 && y == -2) {
+    const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://ipsme.dev/js-blue/blue.html" };
+
+    const uuid_id= uuid();
+    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
+    json_Warp= warp;
+  }
+
+  if (x == -20 && y == -8) {
+    const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9" };
+
+    const uuid_id= uuid();
+    const rsa_enc= key.encrypt(uuid_id, 'base64');
+  
+    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
+    warp.warp.lock= rsa_enc;
+    json_Warp= warp;
+  }
 
   // setStatus('WARP');
   
@@ -290,39 +306,9 @@ twoPhW.config.options= {
 //-----------------------------------------------------------------------------------------------------------------------
 // IPSME base handlers
 
-/*
-const schema_json_Warp_onClick= {
-  type : "object",
-  required : ["onClick_Warp"],
-  properties : {
-    onClick_Warp : { type : "object" },
-  },
-}
-
-const validate_json_Warp_onClick= ajv.compile(schema_json_Warp_onClick);
-*/
-
 function ipsme_handler_object_(msg, obj_msg)
 {
   // console.log('ipsme_handler_object_: obj_msg: ', obj_msg); 
-
-  /*
-  if (validate_json_RoomEntryModal(obj_msg) && handler_RoomEntryModal(msg, obj_msg))
-    return true;
-
-  if (validate_json_AvatarSettingsContent(obj_msg) && handler_AvatarSettingsContent(msg, obj_msg))
-    return true;
-
-  if (validate_json_MicSetupModal(obj_msg) && handler_MicSetupModal(msg, obj_msg))
-    return true;
-
-  if (validate_json_SceneEntry(obj_msg) && handler_SceneEntry(msg, obj_msg))
-    return true;
-
-  if (validate_json_Warp_onClick(obj_msg) && handler_Warp_onClick(obj_msg, obj_msg))
-    return true;
-
-  */
 
   return false;
 }
@@ -346,9 +332,6 @@ function ipsme_handler_string_(msg, str_msg)
   if (typeof(json_msg) === 'object' && ipsme_handler_object_(msg, json_msg))
     return true;
 
-  // if (jsonMsg['INIT!'] !== undefined)
-  //   return handler_INIT(str_msg, jsonMsg['INIT!']);
-
   return false;
 }
 
@@ -371,8 +354,6 @@ IPSME_MsgEnv.config.options= {
 }
 
 IPSME_MsgEnv.subscribe(ipsme_handler_);
-
-IPSME_MsgEnv.publish('LKJLDKJLKJLKJSLKJSDLFKJLKJSDF');
 
 //-------------------------------------------------------------------------------------------------
 
@@ -667,7 +648,7 @@ export class BrowserInterface {
   public GoTo(data: { x: number; y: number }) {
     notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
     // TeleportController.goTo(data.x, data.y)
-    onClick_Warp_()
+    onClick_Warp_(data.x, data.y);
   }
 
   public GoToMagic() {
