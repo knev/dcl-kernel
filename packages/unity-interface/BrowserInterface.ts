@@ -104,19 +104,198 @@ import {
   searchChannels
 } from 'shared/friends/sagas'
 import { areChannelsEnabled, getMatrixIdFromUser } from 'shared/friends/utils'
+
 import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel'
+import * as twoPhW from '@ipsme/protocol-2phw'
 
-function ipsme_handler_(msg: any)
+//-------------------------------------------------------------------------------------------------
+
+function onClick_Warp()
 {
-  console.log('ipsme_handler_', msg);
+  const json_User= { id: "joeSpace", auth:"https://hubs.local:8080/hub.html?hub_id=7EpqHEW" };
+  const json_Hyperport= { browser : "_default", target : "_blank", URL : "http://localhost/js-blue.git/blue.html" };
 
+  const json_Warp= twoPhW.create_Warp_out(uuid(), json_User, json_Hyperport);
+  
+  console.log('onClick_Warp: publish Warp ['+ JSON.stringify(json_Warp) +']'); 
+  IPSME_MsgEnv.publish( JSON.stringify(json_Warp) );
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+// Sender
+
+function callback_Ack_Warp(msg, json_Ack, json_Warp, json_Engage) 
+{
+	// console.log('callback_Ack_Warp: Ack: ', json_Ack);
+
+	console.log('callback_Ack_Warp: publish: Engage: ', json_Engage);
+	IPSME_MsgEnv.publish( JSON.stringify(json_Engage) );
+
+	// setStatus('ENGAGE'); // ENGAGE/ABORT
+  return true;
+}
+
+function callback_Ack_Engage(msg, json_Ack, json_Engage)
+{
+	console.log('callback_Ack_Engage: Ack Engage: ', json_Ack);
+
+	// setUser({ id : "", authentication : "" }, "");
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+// Receiver
+
+function callback_Warp(msg, json_Warp, json_Ack)
+{
+	// console.log('callback_Warp: Warp: ', json_Warp);
+
+	const json_User= json_Warp.warp.user;
+	const json_Hyperport= json_Warp.warp.hyperport;
+
+  /*
+  console.log( key.exportKey('pkcs1-private-pem') );
+
+  const dec_id= key.decrypt(json_Warp.warp.lock);  
+  
+  let utf8decoder = new TextDecoder(); 
+  const uuid_id= utf8decoder.decode(dec_id)
+  console.log('dec_URL', uuid_id);
+
+  if (uuid_id !== json_Warp.warp.id) {
+    console.log('callback_Warp: RSA lock check failed');
+    return false;
+  }
+  */
+
+	console.log('json_User', json_User);
+	console.log('json_Hyperport', json_Hyperport);
+
+	// if (jsonHyperport.destination !== window.location.href)
+	// 	return;
+
+
+  console.log('callback_Warp: publish Ack: ', json_Ack); 
+	IPSME_MsgEnv.publish( JSON.stringify(json_Ack) );
+
+	// setUser(json_User, 'PREPARE'); // PREPARE/ABORT
+  return true;
+}
+
+function callback_Engage(msg, json_Engage, json_Ack)
+{
+	// console.log('callback_Engage: Engage: ', json_Engage);
+
+	console.log('callback_Engage: publish: Ack: ', json_Ack);
+	IPSME_MsgEnv.publish( JSON.stringify(json_Ack) );
+
+	// setStatus('IN WORLD'); // ACKNOWLEDGE/ABORT
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+function callback_Abort()
+{
+	console.log('callback_Abort: ... : ');
+
+  return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const str_uuid_ID_ : string = uuid();
+console.log('uuid_referer_ID= ', str_uuid_ID_);
+twoPhW.config.str_uuid_referer= str_uuid_ID_;
+twoPhW.config.receiver(callback_Warp, callback_Engage);
+twoPhW.config.sender(callback_Ack_Warp, callback_Ack_Engage);
+twoPhW.config.callback_Abort= callback_Abort;
+
+//-----------------------------------------------------------------------------------------------------------------------
+// IPSME base handlers
+
+/*
+const schema_json_Warp_onClick= {
+  type : "object",
+  required : ["onClick_Warp"],
+  properties : {
+    onClick_Warp : { type : "object" },
+  },
+}
+
+const validate_json_Warp_onClick= ajv.compile(schema_json_Warp_onClick);
+*/
+
+function ipsme_handler_object_(msg, obj_msg)
+{
+  // console.log('ipsme_handler_object_: obj_msg: ', obj_msg); 
+
+  /*
+  if (validate_json_RoomEntryModal(obj_msg) && handler_RoomEntryModal(msg, obj_msg))
+    return true;
+
+  if (validate_json_AvatarSettingsContent(obj_msg) && handler_AvatarSettingsContent(msg, obj_msg))
+    return true;
+
+  if (validate_json_MicSetupModal(obj_msg) && handler_MicSetupModal(msg, obj_msg))
+    return true;
+
+  if (validate_json_SceneEntry(obj_msg) && handler_SceneEntry(msg, obj_msg))
+    return true;
+
+  if (validate_json_Warp_onClick(obj_msg) && handler_Warp_onClick(obj_msg, obj_msg))
+    return true;
+
+  */
+
+  return false;
+}
+
+function ipsme_handler_string_(msg, str_msg)
+{
+  let json_msg;
+  try {
+    json_msg= JSON.parse(str_msg);
+  }
+  catch (err) {
+    // console.log("ipsme_handler_string_: DROP! ["+ str_msg.length +"]");
+    return false;
+  }
+
+  // console.log('ipsme_handler_string_: JSON ['+ str_msg +']'); 
+
+  if (twoPhW.handler_json(msg, json_msg))
+    return true;
+
+  if (typeof(json_msg) === 'object' && ipsme_handler_object_(msg, json_msg))
+    return true;
+
+  // if (jsonMsg['INIT!'] !== undefined)
+  //   return handler_INIT(str_msg, jsonMsg['INIT!']);
+
+  return false;
+}
+
+function ipsme_handler_(msg : any) 
+{
+  // console.log('ipsme_handler_: msg: ', msg); 
+
+  if (typeof(msg) === 'string' && ipsme_handler_string_(msg, msg)) 
+    return true;
+
+  if (typeof(msg) === 'object' && ipsme_handler_object_(msg, msg))
+    return true;
+  
+  console.log("handler_: DROP! msg: ", msg);
+  return false
 }
 
 IPSME_MsgEnv.subscribe(ipsme_handler_);
 
-setInterval(function() {
-  IPSME_MsgEnv.publish('LKJLDKJLKJLKJSLKJSDLFKJLKJSDF');
-}, 1000);
+IPSME_MsgEnv.publish('LKJLDKJLKJLKJSLKJSDLFKJLKJSDF');
+
+//-------------------------------------------------------------------------------------------------
 
 declare const globalThis: { gifProcessor?: GIFProcessor }
 export const futures: Record<string, IFuture<any>> = {}
@@ -408,7 +587,8 @@ export class BrowserInterface {
 
   public GoTo(data: { x: number; y: number }) {
     notifyStatusThroughChat(`Jumped to ${data.x},${data.y}!`)
-    TeleportController.goTo(data.x, data.y)
+    // TeleportController.goTo(data.x, data.y)
+    onClick_Warp()
   }
 
   public GoToMagic() {
