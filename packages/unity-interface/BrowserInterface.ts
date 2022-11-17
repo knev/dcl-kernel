@@ -110,12 +110,75 @@ import * as twoPhW from '@ipsme/protocol-2phw'
 
 //-------------------------------------------------------------------------------------------------
 
+const NodeRSA = require('node-rsa');
+//import './node-rsa-browserify.js';
+//const key = new NodeRSA({});
+
+/*
+-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAnCFH2r66kIEVGouXx5y5q3asiZ5w/qhNPc4artNSi4+3Ud4Dm/kw
+PgkdOEYr5Jm7gSrOXVtD2rAzjKjJXvkbI/H+zR8XAfVqDFN9vUzmIrr9Fx2KYd0/
+ZNwNTeoV+q9AoQxjvSVhNrKLiYoGScS2PHqMVEXu+FrcnI6aG8dvM2kpzYXKSolY
+kgH85tqibmSs6izSDtBpVN4mxJyXpBHLZTUdtNgaGsB4u5ctbgrVFza1r4kylACp
+z+FKhVLgkLCURvZZ96+6Lm97V11Aeur8ySJmi7cShkVIIcM2QCWc11yMV7l82VbF
+4OuJqsoVa0rz9bNBWP5Iq5vE4NVvdtXNjQIDAQAB
+-----END RSA PUBLIC KEY-----
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEAnCFH2r66kIEVGouXx5y5q3asiZ5w/qhNPc4artNSi4+3Ud4D
+m/kwPgkdOEYr5Jm7gSrOXVtD2rAzjKjJXvkbI/H+zR8XAfVqDFN9vUzmIrr9Fx2K
+Yd0/ZNwNTeoV+q9AoQxjvSVhNrKLiYoGScS2PHqMVEXu+FrcnI6aG8dvM2kpzYXK
+SolYkgH85tqibmSs6izSDtBpVN4mxJyXpBHLZTUdtNgaGsB4u5ctbgrVFza1r4ky
+lACpz+FKhVLgkLCURvZZ96+6Lm97V11Aeur8ySJmi7cShkVIIcM2QCWc11yMV7l8
+2VbF4OuJqsoVa0rz9bNBWP5Iq5vE4NVvdtXNjQIDAQABAoIBACIE/msjc/NYrQiD
+sibEd5Bs41t5MpXKhkoZRqchVLMkNYWZIqAxw9lAkyVX5OiCtuCGO0EMSdS04Aae
+IIKZNNi4OhTn2VOL7feRmaxNvTeEFvGadjSsyMtpR1zazL86wJJW6MSmCHCqpszp
+TkV0n2C+MyWJt3BWHAvg5qN26TwCLtQLmWxZ3TVbnt+HM11JDqjJGw+hQsW81114
+7Wr7YV0/lrKS1u3A6b+YsHiOe4JhcnezFLsq1zs3KXQ4zRz0qphN5aYvj/o2I6Vo
+kEJwz1XP8Ks1xWGZrm+aC5kLYJznKHy6MPy47nXU/4TUYhEzs+3MsDe1VZV0VaNJ
+ebuv2uECgYEA1SF4+7+MUwZ7QbreZEQ0YWjCN0fvtilifkl0vV6WHhSRCWNqyjqY
+k79h/c3+NcxoVVg8QO0/4HJAPTaZq+gm/jj5YF5qJHCBQItBKsPwS/3RgbQkcPhS
+f/mnO7UhKRr3FX8DI6KSPayQKPYHXOik5Qszx5zclnL2ekFQ2v7p22sCgYEAu4i5
+0EPLXw0pJayqTLaD1ig3DH5f3jaIeWYRbX2wO7eY9ypj0c0Vi8U8Nlft26fLkII5
+7vU1xav2u1sEVRxjA9K/fFJ5P4QqyktjjGkVnwj/mn7TTTyBDR4PuxjgI0YUxF2c
+t77WHYYvrtX2qFj0Raysi0vhNPfJYJKgUBv2cOcCgYEAlreR/61IRVo7BZNpO0yE
+IjJbzY4AdTg034uAk330+Jagrhvw48umJC1d1Ya7cz32tgusqFleJ5GD3gXjjA6i
+rHqL11tNAjHRJVyUm/Jt1r9KTcefUYg5hyh725xOM+xOuJPWG3gWpKiIVX8OW+Rk
+31gZqNpDn9zycigITqWfqLsCgYEAqmqmCGcDEZ5hDPZqT4nwJhWnaLgSoFlIDaG+
+JpR4KNw/qiQgT5Ahi0Ex5WRkJx7FMs3UnZzBP590eG9OcZV5OQkzr2M3AYw2Yly9
+2uPHnRzNQfUMSXy4/VWbD/eb/xH5XzR+bM+DvZKqFCQloHgtin9O0MqkncCqhBLa
+kdHHUnMCgYEA1OjBlHqZ0jZt22jtqlVYJQN5RiGzi9w3LmIXJI5CacbCOu94rCZT
+G+C7ahNyaIJn/T12XO2waVdiOvdzZEEJrFgyGphgG0bEmAtDpxa/iDrrmEDhsLxf
+YTiYqRQ8FLUT1zRPZUG4gJtXt2JqQhPAMoLhOSwpsvw99qvWL+S4Qb8=
+-----END RSA PRIVATE KEY-----
+*/
+
+const key = new NodeRSA( String.raw`-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAnCFH2r66kIEVGouXx5y5q3asiZ5w/qhNPc4artNSi4+3Ud4Dm/kw
+PgkdOEYr5Jm7gSrOXVtD2rAzjKjJXvkbI/H+zR8XAfVqDFN9vUzmIrr9Fx2KYd0/
+ZNwNTeoV+q9AoQxjvSVhNrKLiYoGScS2PHqMVEXu+FrcnI6aG8dvM2kpzYXKSolY
+kgH85tqibmSs6izSDtBpVN4mxJyXpBHLZTUdtNgaGsB4u5ctbgrVFza1r4kylACp
+z+FKhVLgkLCURvZZ96+6Lm97V11Aeur8ySJmi7cShkVIIcM2QCWc11yMV7l82VbF
+4OuJqsoVa0rz9bNBWP5Iq5vE4NVvdtXNjQIDAQAB
+-----END RSA PUBLIC KEY-----` );
+
+console.log( key.exportKey('pkcs1-public-pem') );
+// console.log( key.exportKey('pkcs1-private-pem') );
+
+//-------------------------------------------------------------------------------------------------
+
 function onClick_Warp()
 {
   const json_User= { id: "joeSpace", auth:"https://hubs.local:8080/hub.html?hub_id=7EpqHEW" };
-  const json_Hyperport= { browser : "_default", target : "_blank", URL : "http://localhost/js-blue.git/blue.html" };
+//  const json_Hyperport= { browser : "_default", target : "_blank", URL : "http://localhost/js-blue.git/blue.html" };
+  const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9" };
 
-  const json_Warp= twoPhW.create_Warp_out(uuid(), json_User, json_Hyperport);
+	const uuid_id= uuid();
+	const rsa_enc= key.encrypt(uuid_id, 'base64');
+
+	const json_Warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
+	json_Warp.warp.lock= rsa_enc;
+
+  // setStatus('WARP');
   
   console.log('onClick_Warp: publish Warp ['+ JSON.stringify(json_Warp) +']'); 
   IPSME_MsgEnv.publish( JSON.stringify(json_Warp) );
