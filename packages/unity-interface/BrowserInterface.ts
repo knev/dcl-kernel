@@ -108,11 +108,15 @@ import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel'
 
 function ipsme_handler_(msg: any)
 {
-  // console.log('ipsme_handler_', msg);
+  console.log('ipsme_handler_', msg);
 
 }
 
 IPSME_MsgEnv.subscribe(ipsme_handler_);
+
+setInterval(function() {
+  IPSME_MsgEnv.publish('LKJLDKJLKJLKJSLKJSDLFKJLKJSDF');
+}, 1000);
 
 declare const globalThis: { gifProcessor?: GIFProcessor }
 export const futures: Record<string, IFuture<any>> = {}
