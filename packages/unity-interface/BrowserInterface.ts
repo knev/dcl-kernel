@@ -226,39 +226,34 @@ function callback_Ack_Engage_(msg, json_Ack, json_Engage)
 //-------------------------------------------------------------------------------------------------
 // Receiver
 
-function callback_Warp_(msg, json_Warp, json_Ack)
-{
-	// console.log('callback_Warp: Warp: ', json_Warp);
+const regex_DCL_ = /^[^:]*:\/\/play.decentraland.org\/\?position=(-?\d+),(-?\d+)$/;
 
-	const json_User= json_Warp.warp.user;
-	const json_Hyperport= json_Warp.warp.hyperport;
+function callback_Warp_(msg, json_Warp, json_Ack) {
+  // console.log('callback_Warp: Warp: ', json_Warp);
 
-  /*
-  console.log( key.exportKey('pkcs1-private-pem') );
+  // const json_User = json_Warp.warp.user;
+  const json_Hyperport = json_Warp.warp.hyperport;
 
-  const dec_id= key.decrypt(json_Warp.warp.lock);  
-  
-  let utf8decoder = new TextDecoder(); 
-  const uuid_id= utf8decoder.decode(dec_id)
-  console.log('dec_URL', uuid_id);
-
-  if (uuid_id !== json_Warp.warp.id) {
-    console.log('callback_Warp: RSA lock check failed');
+  if (typeof json_Hyperport !== "string")
     return false;
-  }
-  */
 
-	console.log('json_User', json_User);
-	console.log('json_Hyperport', json_Hyperport);
+  let m = json_Hyperport.match(regex_DCL_);
+  if (m === null)
+    return false;
 
-	// if (jsonHyperport.destination !== window.location.href)
-	// 	return;
+  const x = Number(m[1]);
+  const y = Number(m[2]);
 
+  // console.log(`callback_Warp_: x=${x}, y=${y}`);
 
-  console.log('callback_Warp: publish Ack: ', json_Ack); 
-	IPSME_MsgEnv.publish( JSON.stringify(json_Ack) );
+  // GoTo()
+  notifyStatusThroughChat(`Jumped to ${x},${y}!`)
+  TeleportController.goTo(x, y);
 
-	// setUser(json_User, 'PREPARE'); // PREPARE/ABORT
+  console.log('callback_Warp: publish Ack: ', json_Ack);
+  IPSME_MsgEnv.publish(JSON.stringify(json_Ack));
+
+  // setUser(json_User, 'PREPARE'); // PREPARE/ABORT
   return true;
 }
 
