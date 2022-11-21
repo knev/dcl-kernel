@@ -176,7 +176,12 @@ function onClick_Warp_(x: number, y : number)
   // -----
 
   if (x == -20 && y == -2) {
-    const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://ipsme.dev/js-blue/blue.html" };
+    const json_Hyperport= { 
+      destination: {
+        browser : "_default", target : "_blank", URL : "https://root-interface.se/js-orange/orange.html"
+      },
+      portal : "E3608BEC-E471-4F86-8214-D928165A306C"
+    };
 
     const uuid_id= uuid();
     const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
@@ -193,6 +198,8 @@ function onClick_Warp_(x: number, y : number)
     warp.warp.lock= rsa_enc;
     json_Warp= warp;
   }
+  
+  else return false;
 
   // setStatus('WARP');
   
@@ -282,7 +289,7 @@ function callback_Abort_()
 const logr_= {
   CXNS : 1,
   REFL : 1,
-  MsgEnv : 1
+  // MsgEnv : 1
 }
 
 const str_uuid_ID_ : string = uuid();
