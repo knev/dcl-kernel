@@ -188,8 +188,13 @@ function onClick_Warp_(x: number, y : number)
     json_Warp= warp;
   }
 
-  if (x == -20 && y == -8) {
-    const json_Hyperport= { browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9" };
+  else if (x == -20 && y == -8) {
+    const json_Hyperport= { 
+      destination: {
+        browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9"
+      },
+      portal: ""
+    };
 
     const uuid_id= uuid();
     const rsa_enc= key.encrypt(uuid_id, 'base64');
@@ -198,7 +203,15 @@ function onClick_Warp_(x: number, y : number)
     warp.warp.lock= rsa_enc;
     json_Warp= warp;
   }
-  
+
+  else if (x == -20 && y == -11) {
+    const json_Hyperport= 'dhewm3://si_map:game/mp/d3dm4';
+
+    const uuid_id= uuid();
+    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
+    json_Warp= warp;
+  }
+
   else return false;
 
   // setStatus('WARP');
