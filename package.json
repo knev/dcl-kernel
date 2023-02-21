@@ -66,7 +66,6 @@
     "ts-proto": "^1.115.4",
     "ts-protoc-gen": "^0.10.0",
     "typescript": "4.6.4",
-    "uuid": "^3.1.0",
     "@protobuf-ts/protoc": "^2.8.1"
   },
   "dependencies": {
@@ -111,6 +110,7 @@
     "redux-saga": "^1.0.5",
     "sdp-transform": "^2.14.1",
     "typesafe-actions": "^4.4.2",
+    "uuid": "^9.0.0",
     "ws": "^7.4.6"
   },
   "bundleDependencies": [

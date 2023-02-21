@@ -1,6 +1,6 @@
 import { Quaternion, EcsMathReadOnlyQuaternion, EcsMathReadOnlyVector3, Vector3 } from '@dcl/ecs-math'
 
-import { uuid } from 'atomicHelpers/math'
+// import { uuid } from 'atomicHelpers/math'
 import { sendPublicChatMessage } from 'shared/comms'
 import { findProfileByName } from 'shared/profiles/selectors'
 import { TeleportController } from 'shared/world/TeleportController'
@@ -107,6 +107,7 @@ import { areChannelsEnabled, getMatrixIdFromUser } from 'shared/friends/utils'
 
 import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel'
 import * as twoPhW from '@ipsme/protocol-2phw'
+import { v4 as uuid4 } from 'uuid';
 
 //-------------------------------------------------------------------------------------------------
 
@@ -183,7 +184,7 @@ function onClick_Warp_(x: number, y : number)
       portal : "E3608BEC-E471-4F86-8214-D928165A306C"
     };
 
-    const uuid_id= uuid();
+    const uuid_id= uuid4();
     const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
     json_Warp= warp;
   }
@@ -196,7 +197,7 @@ function onClick_Warp_(x: number, y : number)
       portal: ""
     };
 
-    const uuid_id= uuid();
+    const uuid_id= uuid4();
     const rsa_enc= key.encrypt(uuid_id, 'base64');
   
     const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
@@ -207,7 +208,7 @@ function onClick_Warp_(x: number, y : number)
   else if (x == -20 && y == -11) {
     const json_Hyperport= 'dhewm3://si_map:game/mp/d3dm4';
 
-    const uuid_id= uuid();
+    const uuid_id= uuid4();
     const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
     json_Warp= warp;
   }
@@ -305,7 +306,7 @@ const logr_= {
   // MsgEnv : 1
 }
 
-const str_uuid_ID_ : string = uuid();
+const str_uuid_ID_ : string = uuid4();
 console.log('uuid_referer_ID= ', str_uuid_ID_);
 
 twoPhW.config.options= {
@@ -644,7 +645,7 @@ export class BrowserInterface {
       }
     })
 
-    const messageId = uuid()
+    const messageId = uuid4()
     const body = `␐${data.id} ${data.timestamp}`
 
     sendPublicChatMessage(messageId, body)
