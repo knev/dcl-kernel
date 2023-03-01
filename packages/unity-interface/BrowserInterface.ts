@@ -222,7 +222,8 @@ function onClick_Warp_(x: number, y : number)
   }
 
   else if (x == -20 && y == -11) {
-    const json_Hyperport= 'dhewm3://si_map:game/mp/d3dm4';
+    // const json_Hyperport= 'dhewm3://si_map:game/mp/d3dm4';
+    const json_Hyperport= 'secondlife://Ahern/128/128';
 
     const uuid_id= uuid4();
     const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
