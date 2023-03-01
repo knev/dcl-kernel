@@ -109,6 +109,22 @@ import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel'
 import * as twoPhW from '@ipsme/protocol-2phw'
 import { v4 as uuid4 } from 'uuid';
 
+import * as sharedworker_reflector from '@ipsme/reflector-webbr-ws';
+
+//-------------------------------------------------------------------------------------------------
+
+sharedworker_reflector.load(window, "./reflector/reflector-bc-ws-client.js", function () {
+
+  let str_URN= window.location.href;
+  if (str_URN.endsWith('/'))
+    str_URN= str_URN.substring(0, str_URN.length-1);
+
+  const json_Announcement= twoPhW.create_Announcement_out(str_URN);
+
+	console.log('reflector_INITd: publish: Announcement: ', JSON.stringify(json_Announcement) );
+	IPSME_MsgEnv.publish( JSON.stringify(json_Announcement) );	
+});
+
 //-------------------------------------------------------------------------------------------------
 
 const NodeRSA = require('node-rsa');
@@ -247,29 +263,32 @@ function callback_Ack_Engage_(msg, json_Ack, json_Engage)
 //-------------------------------------------------------------------------------------------------
 // Receiver
 
-const regex_DCL_ = /^[^:]*:\/\/play.decentraland.org\/\?position=(-?\d+),(-?\d+)$/;
+//const regex_DCL_ = /^[^:]*:\/\/play.decentraland.org\/\?position=(-?\d+),(-?\d+)$/;
+const regex_DCL_ = /^[^:]*:\/\/localhost:8080\/\?position=(-?\d+),(-?\d+)$/; // should handle URL encoding 87%2C33
+// const regex_DCL_ = /^[^:]*:\/\/35.187.58.240:8080\/\?position=(-?\d+),(-?\d+)$/; // should handle URL encoding 87%2C33
 
 function callback_Warp_(msg, json_Warp, json_Ack) {
   // console.log('callback_Warp: Warp: ', json_Warp);
 
   // const json_User = json_Warp.warp.user;
   const json_Hyperport = json_Warp.warp.hyperport;
+  const str_URL= json_Hyperport.destination.URL;
 
-  if (typeof json_Hyperport !== "string")
+  if (typeof str_URL !== "string")
     return false;
 
-  let m = json_Hyperport.match(regex_DCL_);
+  let m = str_URL.match(regex_DCL_);
   if (m === null)
     return false;
 
-  const x = Number(m[1]);
-  const y = Number(m[2]);
+  // const x = Number(m[1]);
+  // const y = Number(m[2]);
 
   // console.log(`callback_Warp_: x=${x}, y=${y}`);
 
   // GoTo()
-  notifyStatusThroughChat(`Jumped to ${x},${y}!`)
-  TeleportController.goTo(x, y);
+  // notifyStatusThroughChat(`Jumped to ${x},${y}!`)
+  // TeleportController.goTo(x, y);
 
   console.log('callback_Warp: publish Ack: ', json_Ack);
   IPSME_MsgEnv.publish(JSON.stringify(json_Ack));
