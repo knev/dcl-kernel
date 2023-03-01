@@ -355,14 +355,19 @@ function ipsme_handler_(msg : any)
 {
   // console.log('ipsme_handler_: msg: ', msg); 
 
-  if (typeof(msg) === 'string' && ipsme_handler_string_(msg, msg)) 
-    return true;
+  try {
+    if (typeof (msg) === 'string' && ipsme_handler_string_(msg, msg))
+      return true;
 
-  if (typeof(msg) === 'object' && ipsme_handler_object_(msg, msg))
-    return true;
-  
-  console.log("handler_: DROP! msg: ", msg);
-  return false
+    if (typeof (msg) === 'object' && ipsme_handler_object_(msg, msg))
+      return true;
+
+  }
+  catch (e) {
+    console.log(e)
+  }
+
+  console.log("ipsme_handler_: DROP! ", msg);
 }
 
 IPSME_MsgEnv.config.options= {
