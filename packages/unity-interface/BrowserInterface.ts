@@ -106,7 +106,8 @@ import {
 import { areChannelsEnabled, getMatrixIdFromUser } from 'shared/friends/utils'
 
 import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel'
-import * as twoPhW from '@ipsme/protocol-2phw'
+// import { TwoPhW, JSON_MsgWarp, JSON_MsgEngage, JSON_MsgAckWarp, JSON_MsgAckEngage, l as l_2PhW } from '@rootintf/protocol-2phw';
+import { TwoPhW, JSON_MsgEngage, JSON_MsgAckWarp, JSON_MsgAckEngage } from '@rootintf/protocol-2phw';
 import { v4 as uuid4 } from 'uuid';
 
 import * as sharedworker_reflector from '@ipsme/reflector-webbr-ws';
@@ -127,6 +128,17 @@ sharedworker_reflector.load(window, "./reflector/reflector-bc-ws-client.js", fun
 
 //-------------------------------------------------------------------------------------------------
 
+const regex_URN_ = /^[^:]*:\/\/(?:www\.|(?!www))(.*)$/;
+
+function extract_URN_(str_URL) {
+    let m= str_URL.match(regex_URN_);
+    if (m === null)
+        return m;
+
+	return m[1];
+}
+
+//-------------------------------------------------------------------------------------------------
 const NodeRSA = require('node-rsa');
 //import './node-rsa-browserify.js';
 //const key = new NodeRSA({});
@@ -188,7 +200,7 @@ function onClick_Warp_(x: number, y : number)
   console.log('onClick_Warp_(): ', x, y);
 
   const json_User= { id: "joeSpace", auth:"https://hubs.local:8080/hub.html?hub_id=7EpqHEW" };
-  let json_Warp= undefined;
+  let json_msgWarp= undefined;
 
   // -----
 
@@ -201,61 +213,78 @@ function onClick_Warp_(x: number, y : number)
     };
 
     const uuid_id= uuid4();
-    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
-    json_Warp= warp;
+    const warp= twoPhW.create_MsgWarp_out(uuid_id, json_User, json_Hyperport);
+		warp.referer= karr_referer_;
+    json_msgWarp= warp;
   }
 
-  else if (x == -20 && y == -8) {
-    const json_Hyperport= { 
-      destination: {
-        browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9"
-      },
-      portal: ""
-    };
+  // else if (x == -20 && y == -8) {
+  //   const json_Hyperport= { 
+  //     destination: {
+  //       browser : "_default", target : "_blank", URL : "https://hubs.local:8080/hub.html?hub_id=4vwPQT9"
+  //     },
+  //     portal: ""
+  //   };
 
-    const uuid_id= uuid4();
-    const rsa_enc= key.encrypt(uuid_id, 'base64');
+  //   const uuid_id= uuid4();
+  //   const rsa_enc= key.encrypt(uuid_id, 'base64');
   
-    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
-    warp.warp.lock= rsa_enc;
-    json_Warp= warp;
-  }
+  //   const warp= twoPhW.create_MsgWarp_out(uuid_id, json_User, json_Hyperport);
+  //   warp.warp.lock= rsa_enc;
+  //   json_msgWarp= warp;
+  // }
 
   else if (x == -20 && y == -11) {
     // const json_Hyperport= 'dhewm3://si_map:game/mp/d3dm4';
     const json_Hyperport= 'secondlife://Ahern/128/128';
 
     const uuid_id= uuid4();
-    const warp= twoPhW.create_Warp_out(uuid_id, json_User, json_Hyperport);
-    json_Warp= warp;
+    const warp= twoPhW.create_MsgWarp_out(uuid_id, json_User, json_Hyperport);
+		warp.referer= karr_referer_;
+    json_msgWarp= warp;
   }
 
   else return false;
 
   // setStatus('WARP');
   
-  console.log('onClick_Warp: publish Warp ['+ JSON.stringify(json_Warp) +']'); 
-  IPSME_MsgEnv.publish( JSON.stringify(json_Warp) );
+  console.log('onClick_Warp: publish Warp ['+ JSON.stringify(json_msgWarp) +']'); 
+  IPSME_MsgEnv.publish( JSON.stringify(json_msgWarp) );
   return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+function callback_msgOptions_(msg, json_msgOptions) 
+{
+	console.log('callback_msgOptions_: ', json_msgOptions);
+
+
+
 }
 
 //-------------------------------------------------------------------------------------------------
 // Sender
 
-function callback_Ack_Warp_(msg, json_Ack, json_Warp, json_Engage) 
+function callback_msgAckWarp_(msg, json_msgAckWarp) 
 {
-	// console.log('callback_Ack_Warp: Ack: ', json_Ack);
+	// console.log('callback_msgAckWarp_: Ack: ', json_msgAckWarp);
 
-	console.log('callback_Ack_Warp: publish: Engage: ', json_Engage);
-	IPSME_MsgEnv.publish( JSON.stringify(json_Engage) );
+	const json_msgWarp= json_msgAckWarp._msg;
+
+	const json_msgEngage= JSON_MsgEngage.create_with_MsgWarp(json_msgWarp)
+	json_msgEngage.referer= karr_referer_;
+
+	console.log('callback_Ack_Warp: publish: Engage: ', json_msgEngage);
+	IPSME_MsgEnv.publish( JSON.stringify(json_msgEngage) );
 
 	// setStatus('ENGAGE'); // ENGAGE/ABORT
   return true;
 }
 
-function callback_Ack_Engage_(msg, json_Ack, json_Engage)
+function callback_msgAckEngage_(msg, json_msgAckEngage)
 {
-	console.log('callback_Ack_Engage: Ack Engage: ', json_Ack);
+	console.log('callback_msgAckEngage_: Ack Engage: ', json_msgAckEngage);
 
 	// setUser({ id : "", authentication : "" }, "");
   return true;
@@ -268,11 +297,11 @@ function callback_Ack_Engage_(msg, json_Ack, json_Engage)
 const regex_DCL_ = /^[^:]*:\/\/localhost:8080\/\?position=(-?\d+),(-?\d+)$/; // should handle URL encoding 87%2C33
 // const regex_DCL_ = /^[^:]*:\/\/35.187.58.240:8080\/\?position=(-?\d+),(-?\d+)$/; // should handle URL encoding 87%2C33
 
-function callback_Warp_(msg, json_Warp, json_Ack) {
-  // console.log('callback_Warp: Warp: ', json_Warp);
+function callback_msgWarp_(msg, json_msgWarp) {
+  // console.log('callback_Warp: Warp: ', json_msgWarp);
 
   // const json_User = json_Warp.warp.user;
-  const json_Hyperport = json_Warp.warp.hyperport;
+  const json_Hyperport = json_msgWarp.warp.hyperport;
   const str_URL= json_Hyperport.destination.URL;
 
   if (typeof str_URL !== "string")
@@ -291,30 +320,27 @@ function callback_Warp_(msg, json_Warp, json_Ack) {
   // notifyStatusThroughChat(`Jumped to ${x},${y}!`)
   // TeleportController.goTo(x, y);
 
-  console.log('callback_Warp: publish Ack: ', json_Ack);
-  IPSME_MsgEnv.publish(JSON.stringify(json_Ack));
+	const json_msgAckWarp= JSON_MsgAckWarp.create_with_msgOk(json_msgWarp, true);
+	json_msgAckWarp.referer= karr_referer_;
+
+  console.log('callback_msgWarp_: publish Ack: ', json_msgAckWarp);
+  IPSME_MsgEnv.publish(JSON.stringify(json_msgAckWarp));
 
   // setUser(json_User, 'PREPARE'); // PREPARE/ABORT
   return true;
 }
 
-function callback_Engage_(msg, json_Engage, json_Ack)
+function callback_msgEngage_(msg, json_msgEngage)
 {
-	// console.log('callback_Engage: Engage: ', json_Engage);
+	// console.log('callback_Engage: Engage: ', json_msgEngage);
 
-	console.log('callback_Engage: publish: Ack: ', json_Ack);
-	IPSME_MsgEnv.publish( JSON.stringify(json_Ack) );
+	const json_msgAckEngage= JSON_MsgAckEngage.create_with_msgOk(json_msgEngage, true);
+	json_msgAckEngage.referer= karr_referer_;
+
+	console.log('callback_msgEngage_: publish: Ack: ', json_msgAckEngage);
+	IPSME_MsgEnv.publish( JSON.stringify(json_msgAckEngage) );
 
 	// setStatus('IN WORLD'); // ACKNOWLEDGE/ABORT
-  return true;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-function callback_Abort_()
-{
-	console.log('callback_Abort: ... : ');
-
   return true;
 }
 
@@ -326,18 +352,15 @@ const logr_= {
   // MsgEnv : 1
 }
 
-const str_uuid_ID_ : string = uuid4();
-console.log('uuid_referer_ID= ', str_uuid_ID_);
+const karr_referer_= [ extract_URN_(window.location.href), uuid4()];
+console.log(`karr_referer_= ${karr_referer_}`);
 
-twoPhW.config.options= {
-  str_uuid_referer: str_uuid_ID_,
-  callback_Warp: callback_Warp_, 
-  callback_Engage: callback_Engage_,
-  callback_Ack_Warp: callback_Ack_Warp_, 
-  callback_Ack_Engage: callback_Ack_Engage_,
-  callback_Abort: callback_Abort_,
-  logr : logr_
-}
+var twoPhW= new TwoPhW();
+
+twoPhW.config.receiver( callback_msgWarp_, callback_msgEngage_ );
+twoPhW.config.sender( callback_msgAckWarp_, callback_msgAckEngage_ );
+twoPhW.config.callback_msgOptions= callback_msgOptions_;
+twoPhW.config.logr= logr_;
 
 //-----------------------------------------------------------------------------------------------------------------------
 // IPSME base handlers
@@ -356,13 +379,12 @@ function ipsme_handler_string_(msg, str_msg)
     json_msg= JSON.parse(str_msg);
   }
   catch (err) {
-    // console.log("ipsme_handler_string_: DROP! ["+ str_msg.length +"]");
     return false;
   }
 
   // console.log('ipsme_handler_string_: JSON ['+ str_msg +']'); 
 
-  if (twoPhW.handler_json(msg, json_msg))
+  if (twoPhW.handler_msg_json(msg, json_msg))
     return true;
 
   if (typeof(json_msg) === 'object' && ipsme_handler_object_(msg, json_msg))
